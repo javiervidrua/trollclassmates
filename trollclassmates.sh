@@ -57,7 +57,7 @@ function menu(){
         while true; do
                 echo 'MENU:'
                 echo '  1-Install dependencies (recommended if this is your first time)'
-                echo '  2-Launch attack'
+                echo '  2-Start trolling'
                 echo '  99-Exit'
                 echo ''
                 read -p 'OPTION: ' OPTION
@@ -112,5 +112,13 @@ function troll(){
         echo $ELAPSED_TIME
 }
 
+function usage(){
+        echo '[*] Usage: bash trollclassmates.sh'
+}
+
 # MAIN
+if [ $# -ne 0 ]; then
+        usage
+        exit
+fi
 menu
